@@ -1,0 +1,24 @@
+# Use an official Python runtime as a parent image (Alpine version)
+FROM python:3.12.5-alpine
+
+# Set environment variables to avoid buffering and ensure proper handling of stdout/stderr
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
+
+# Set the working directory in the container
+WORKDIR /app
+
+# Install build dependencies for Alpine
+RUN apk add gcc musl-dev libffi-dev
+
+# Copy the requirements.txt file
+COPY requirements.txt .
+
+# Install any needed packages specified in requirements.txt
+RUN pip install -r requirements.txt
+
+# Copy the rest of the application code
+COPY . .
+
+# Expose port 8000 for the FastAPI application
+EXPOSE 8000

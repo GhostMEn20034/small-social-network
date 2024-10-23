@@ -1,0 +1,30 @@
+services:
+  web:
+    env_file:
+      - .env
+    build:
+      context: .
+      dockerfile: DockerfileLocal
+    command: uvicorn src.main:app --host 0.0.0.0 --port 8000 --reload
+    volumes:
+      - .:/app
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+    container_name: fastapi_social_network
+
+  db:
+    image: postgres:15.4-alpine
+    container_name: postgres_social_network_db
+    volumes:
+      - postgres_social_network:/var/lib/postgresql/data/
+      - ./init-database.sh:/docker-entrypoint-initdb.d/init-database.sh
+    environment:
+      - POSTGRES_PASSWORD=${SUPER_USER_PWD}
+      - SQL_DATABASE=${SQL_DATABASE}
+      - SQL_USER=${SQL_USER}
+      - SQL_PASSWORD=${SQL_PASSWORD}
+
+volumes:
+  postgres_social_network:
