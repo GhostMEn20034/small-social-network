@@ -3,7 +3,7 @@ from dependency_injector.wiring import inject, Provide
 
 from src.core.containers import Container
 from src.models.user import User
-from src.schemes.user import UserCreate, UserReadSchema, UserUpdateSchema
+from src.schemes.user import UserCreate, UserReadSchema, UserUpdateSchema, ChangePasswordSchema
 from src.services.user.abstract import AbstractUserService
 from src.dependencies.auth import get_current_user
 
@@ -38,6 +38,8 @@ async def update_user(
 @router.put('/change-password', status_code=status.HTTP_204_NO_CONTENT)
 @inject
 async def change_password(
-        user: User = Depends(get_current_user)
+        change_password_data: ChangePasswordSchema,
+        user: User = Depends(get_current_user),
+        user_service: AbstractUserService = Depends(Provide[Container.user_service]),
 ):
-    pass
+    await user_service.change_password(user, change_password_data)

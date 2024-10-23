@@ -1,7 +1,8 @@
 from datetime import datetime, date, UTC
+from typing import List
 
 from pydantic import EmailStr
-from sqlmodel import Field, Column, String, Date, TIMESTAMP
+from sqlmodel import Field, Column, String, Date, TIMESTAMP, Relationship
 
 from .base import BaseModel
 
@@ -31,3 +32,6 @@ class User(BaseModel, table=True):
             nullable=False
         )
     )
+
+    # Relationship with Post model
+    posts: List["Post"] = Relationship(back_populates="author")

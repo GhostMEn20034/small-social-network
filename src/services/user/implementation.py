@@ -3,7 +3,7 @@ from fastapi import HTTPException, status
 from .abstract import AbstractUserService
 from src.schemes.user import UserCreate, UserReadSchema, UserUpdateSchema, ChangePasswordSchema
 from src.repositories.unit_of_work.abstract import AbstractUnitOfWork
-from src.utils.password_utils import hash_password
+from src.utils.password_utils import hash_password, verify_password
 from src.utils.user.user_model import create_user_from_signup_data, apply_updates_to_user
 from src.models.user import User
 
@@ -53,6 +53,24 @@ class UserServiceImplementation(AbstractUserService):
             return UserReadSchema(**updated_user.model_dump())
 
 
-    async def change_password(self, change_password_data: ChangePasswordSchema) -> None:
-        pass
+    async def change_password(self, user: User, change_password_data: ChangePasswordSchema) -> None:
+        """
+        :param user: User object before update
+        :param change_password_data: Object with old password and new password
+        """
+        old_hashed_password = user.password
+
+        if not verify_password(change_password_data.old_password, old_hashed_password):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Wrong old password"
+            )
+
+        new_hashed_password = hash_password(change_password_data.new_password1)
+
+        user.password = new_hashed_password
+
+        async with self._uow:
+            await self._uow.user_repository.update(user)
+            await self._uow.commit()
 

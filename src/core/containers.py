@@ -8,6 +8,8 @@ from .settings import settings
 from .configs.jwt_handler_config import JWTHandlerConfig
 from src.utils.auth.jwt_handler import JWTHandler
 from src.services.auth.implementation import AuthServiceImplementation
+from src.repositories.post.implementation import PostRepositoryImplementation
+from src.services.post.implementation import PostServiceImplementation
 
 
 class Container(containers.DeclarativeContainer):
@@ -18,13 +20,16 @@ class Container(containers.DeclarativeContainer):
     jwt_handler = providers.Singleton(JWTHandler, config=jwt_config)
 
     user_repository = providers.Factory(UserRepositoryImplementation, session=db_session)
+    post_repository = providers.Factory(PostRepositoryImplementation, session=db_session)
 
     unit_of_work = providers.Factory(
         UnitOfWork,
-        session=db_session, user_repository=user_repository
+        session=db_session,
+        user_repository=user_repository, post_repository=post_repository,
     )
 
     user_service = providers.Factory(UserServiceImplementation, uow=unit_of_work)
+    post_service = providers.Factory(PostServiceImplementation, uow=unit_of_work)
 
     auth_service = providers.Factory(
         AuthServiceImplementation,

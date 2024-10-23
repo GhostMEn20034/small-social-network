@@ -15,5 +15,5 @@ class AbstractUserService(ABC):
         pass
 
     @abstractmethod
-    async def change_password(self, change_password_data: ChangePasswordSchema) -> None:
+    async def change_password(self, user: User, change_password_data: ChangePasswordSchema) -> None:
         pass
