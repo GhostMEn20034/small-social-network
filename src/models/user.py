@@ -35,3 +35,6 @@ class User(BaseModel, table=True):
 
     # Relationship with Post model
     posts: List["Post"] = Relationship(back_populates="author")
+    # Relationship with Comment model
+    comments: List["Comment"] = Relationship(back_populates="owner")
+    likes: List["Like"] = Relationship(back_populates="owner", sa_relationship_kwargs={"cascade": "all, delete-orphan"})

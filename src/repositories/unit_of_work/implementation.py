@@ -1,18 +1,23 @@
 from typing import Any
-
 from sqlmodel.ext.asyncio.session import AsyncSession
 
-from src.repositories.user.abstract import AbstractUserRepository
 from .abstract import AbstractUnitOfWork
-from ..post.abstract import AbstractPostRepository
+from src.repositories.user.abstract import AbstractUserRepository
+from src.repositories.comment.abstract import AbstractCommentRepository
+from src.repositories.post.abstract import AbstractPostRepository
+from src.repositories.like.abstract import AbstractLikeRepository
 
 
 class UnitOfWork(AbstractUnitOfWork):
     def __init__(self, session: AsyncSession,
-                 user_repository: AbstractUserRepository, post_repository: AbstractPostRepository):
+                 user_repository: AbstractUserRepository, post_repository: AbstractPostRepository,
+                 comment_repository: AbstractCommentRepository, like_repository: AbstractLikeRepository,
+                 ):
         self._session = session
         self.user_repository = user_repository
         self.post_repository = post_repository
+        self.comment_repository = comment_repository
+        self.like_repository = like_repository
 
 
     async def commit(self) -> None:

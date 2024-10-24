@@ -1,6 +1,6 @@
 from datetime import datetime, UTC
 from sqlmodel import Field, Column, Integer, String, TIMESTAMP, Relationship, ForeignKey, BOOLEAN
-from typing import Optional
+from typing import Optional, List
 
 from .user import User
 from .base import BaseModel
@@ -52,4 +52,10 @@ class Post(BaseModel, table=True):
             onupdate=lambda: datetime.now(UTC),
             nullable=False
         )
+    )
+
+    # Relationship with Comment model
+    comments: List["Comment"] = Relationship(
+        back_populates="post",
+        sa_relationship_kwargs={"cascade": "all, delete-orphan"}
     )
