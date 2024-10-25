@@ -14,6 +14,9 @@ class AbstractCommentService(ABC):
     async def create_comment(self, user: User, comment_data: CreateCommentSchema) -> CommentReadSchema:
         pass
 
+    async def auto_reply_comment(self, comment_id: int) -> None:
+        pass
+
     @abstractmethod
     async def get_top_level_comments(self, post_id: int):
         pass

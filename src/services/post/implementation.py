@@ -1,5 +1,4 @@
 from typing import List
-
 from fastapi import HTTPException, status
 
 from src.models.user import User
@@ -10,15 +9,29 @@ from src.schemes.post.list import PostListItemSchema, PostListItemWithAuthorSche
 from src.schemes.post.common import Author
 from src.schemes.post.update import UpdatePostSchema
 from src.services.post.abstraction import AbstractPostService
+from src.utils.content_moderator.abstract import AbstractContentModerator
 from src.utils.post.ownership import is_user_owner_of_post
 from src.utils.post.post_model import create_post_from_schema, update_post_from_schema
 
 
 class PostServiceImplementation(AbstractPostService):
-    def __init__(self, uow: AbstractUnitOfWork):
+    def __init__(self, uow: AbstractUnitOfWork, content_moderator: AbstractContentModerator):
         self._uow = uow
+        self._content_moderator = content_moderator
 
     async def create_post(self, user: User ,create_post_schema: PostCreateSchema) -> PostListItemSchema:
+        text_to_moderate = (
+            f"{create_post_schema.title}\n"
+            f"{create_post_schema.content}"
+        )
+
+        is_text_appropriate = await self._content_moderator.moderate_text(text_to_moderate)
+        if not is_text_appropriate:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Text has content such as sexual harassment, offensive content etc."
+            )
+
         post = create_post_from_schema(user, create_post_schema)
         async with self._uow:
             created_post = await self._uow.post_repository.add(post)
@@ -101,6 +114,18 @@ class PostServiceImplementation(AbstractPostService):
             return post_details
 
     async def update_post(self, user: User, post_id: int, update_post_data: UpdatePostSchema) -> PostListItemSchema:
+        text_to_moderate = (
+            f"{update_post_data.title}\n"
+            f"{update_post_data.content}"
+        )
+
+        is_text_appropriate = await self._content_moderator.moderate_text(text_to_moderate)
+        if not is_text_appropriate:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Text has content such as sexual harassment, offensive content etc."
+            )
+
         async with self._uow:
             post = await self._uow.post_repository.get_by_id(post_id)
             if post is None:

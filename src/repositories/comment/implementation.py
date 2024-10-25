@@ -82,8 +82,8 @@ class CommentRepositoryImplementation(GenericRepositoryImplementation[Comment], 
             )
             .join(Post)
             .where(
-                Comment.created_at >= date_range.date_from,
-                Comment.created_at <= date_range.date_to,
+                cast(Comment.created_at, Date) >= date_range.date_from,
+                cast(Comment.created_at, Date) <= date_range.date_to,
                 Post.author_id == user.id,
             )
             .group_by(cast(Comment.created_at, Date))
