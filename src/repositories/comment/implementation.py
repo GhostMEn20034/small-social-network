@@ -62,10 +62,13 @@ class CommentRepositoryImplementation(GenericRepositoryImplementation[Comment], 
         )
 
         result = await self._session.exec(stmt)
-        comment, post = result.first()  # Unpacking the results
 
-        if comment is None:
+        first_object = result.first()
+
+        if first_object is None:
             return None
+
+        comment, post = first_object  # Unpacking the results
 
         # Attach the post to the comment for easier access
         comment.post = post

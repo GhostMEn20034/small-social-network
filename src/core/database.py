@@ -5,7 +5,6 @@ from sqlalchemy.orm import sessionmaker
 from src.core.settings import settings
 
 
-
 engine = create_async_engine(settings.psql_connection_string, echo=True, future=True)
 
 # Asynchronous function to create tables

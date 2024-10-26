@@ -1,0 +1,32 @@
+services:
+  web:
+    env_file:
+      - .env.test
+    build:
+      context: .
+      dockerfile: DockerfileLocal
+    command: ["sh", "-c", "pytest -v --tb=short --disable-warnings; tail -f /dev/null"]  # Keep the container running
+    volumes:
+      - .:/app
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+    container_name: fastapi_social_network_test
+
+  db:
+    env_file:
+      - .env.test
+    image: postgres:15.4-alpine
+    container_name: postgres_social_network_db_test
+    volumes:
+      - postgres_social_network_test:/var/lib/postgresql/data/
+      - ./init-database.sh:/docker-entrypoint-initdb.d/init-database.sh
+    environment:
+      - POSTGRES_PASSWORD=${SUPER_USER_PWD}
+      - SQL_DATABASE=${SQL_DATABASE}
+      - SQL_USER=${SQL_USER}
+      - SQL_PASSWORD=${SQL_PASSWORD}
+
+volumes:
+  postgres_social_network_test:
